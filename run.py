@@ -56,7 +56,7 @@ class Code_MainWindow(Ui_MainWindow):
         from torch.cuda import is_available
         self.use_cuda.setChecked(is_available())
         self.use_cuda.setDisabled(not is_available())
-
+        self.model_name = None
         self.imagePath_content = None
 
     def BrowseFolder(self):
@@ -305,8 +305,8 @@ class Code_MainWindow(Ui_MainWindow):
         return temp_path, suffix
 
     def Save(self):
-        if not self.ori_image:
-            QMessageBox.warning(self, "You need select an image!", self.tr("You need select an image!"))
+        if not self.ori_image or not self.model_name:
+            QMessageBox.warning(self, "You need select an image!", self.tr("You need select an image and load a model!"))
             return
         opt = self.save_option.currentText()
         _path, suffix = self.GetSavePath()
@@ -321,16 +321,23 @@ class Code_MainWindow(Ui_MainWindow):
             return
 
         if opt == 'Model output':
+            if self.output_image is None:
+                QMessageBox.warning(self, "Failed!", self.tr("You need to apple a model first!"))
+                return
             new_save_name = _path + '_output_' + self.model_name + suffix
             self.output_image.save(new_save_name)
-            # new_save_name = _path + '_origin_' + self.model_name + suffix
-            # self.ori_markers.save(new_save_name)
 
-        if opt == 'Original image with markers':
+        elif opt == 'Original image with markers':
+            if self.ori_markers is None:
+                QMessageBox.warning(self, "Failed!", self.tr("You need to detect first!"))
+                return
             new_save_name = _path + '_origin_' + self.model_name + suffix
             self.ori_markers.save(new_save_name)
 
-        if opt == 'Four-panel image':
+        elif opt == 'Four-panel image':
+            if self.ori_content is None or self.output_image is None or self.ori_markers is None or self.out_markers is None:
+                QMessageBox.warning(self, "Failed!", self.tr("You need to apple a model and detect first!"))
+                return
             new_save_name = _path + '_four_panel_' + self.model_name + suffix
             im_save = Image.new('RGB', ((self.width + 1) * 2, (self.height + 1) * 2))
             im_save.paste(self.ori_content, (0, 0))
@@ -340,7 +347,10 @@ class Code_MainWindow(Ui_MainWindow):
             im_save.save(new_save_name)
             del im_save
 
-        if opt == 'Atom positions':
+        elif opt == 'Atom positions':
+            if self.ori_content is None or self.output_image is None or self.ori_markers is None or self.out_markers is None:
+                QMessageBox.warning(self, "Failed!", self.tr("You need to apple a model and detect first!"))
+                return
             new_save_name = _path + '_pos_' + self.model_name + '.txt'
             file = open(new_save_name, 'w')
             for p in self.props:
@@ -354,7 +364,10 @@ class Code_MainWindow(Ui_MainWindow):
                 file.write("\n")
             file.close()
 
-        if opt == 'Save ALL':
+        elif opt == 'Save ALL':
+            if self.ori_content is None or self.output_image is None or self.ori_markers is None or self.out_markers is None:
+                QMessageBox.warning(self, "Failed!", self.tr("You need to apple a model and detect first!"))
+                return
             new_save_name = _path + suffix
             self.ori_content.save(new_save_name)
             new_save_name = _path + '_output_' + self.model_name + suffix
