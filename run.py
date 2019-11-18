@@ -50,8 +50,8 @@ class Code_MainWindow(Ui_MainWindow):
 
         self.__model_dir = "model_weights"
         self.__models = {
-            'Atom64': os.path.join(self.__model_dir, 'Atom64.pth'),
-            'Atom64_2': os.path.join(self.__model_dir, 'Atom64_2.pth')
+            'Denoise(smooth)': os.path.join(self.__model_dir, 'Denoise(smooth).pth'),
+            'Denoise(sharp)': os.path.join(self.__model_dir, 'Denoise(sharp).pth')
         }
         from torch.cuda import is_available
         self.use_cuda.setChecked(is_available())
